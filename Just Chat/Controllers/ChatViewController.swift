@@ -23,13 +23,29 @@ class ChatViewController: UIViewController {
         }
     }
     
+    var messages: [Message] = [Message(sender: "a@b.com", body: "hello"),
+                               Message(sender: "c@d.com", body: "aloha")]
+    
     override func viewDidLoad() {
+        tableView.dataSource = self
         super.viewDidLoad()
         navigationItem.hidesBackButton = true
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
     }
-    
 
 }
+
+extension ChatViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return messages.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
+        cell.textLabel?.text = messages[indexPath.row].body
+        return cell
+    }
+}
+
