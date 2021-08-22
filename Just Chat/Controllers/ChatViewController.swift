@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 
 class ChatViewController: UIViewController {
-
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextfield: UITextField!
     @IBAction func logOutButtonPressed(_ sender: UIBarButtonItem) {
@@ -22,6 +22,8 @@ class ChatViewController: UIViewController {
             print("Error signing out: %@", signOutError)
         }
     }
+    
+    let db = Firestore.firestore()
     
     var messages: [Message] = [Message(sender: "a@b.com", body: "hello"),
                                Message(sender: "c@d.com", body: "aloha")]
@@ -35,8 +37,18 @@ class ChatViewController: UIViewController {
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
+        if let messageBody = messageTextfield.text, let messageSender = Auth.auth().currentUser?.email {
+            db.collection(Constants.FStore.collectionName).addDocument(data: [Constants.FStore.senderField: messageSender, Constants.FStore.bodyField: messageBody]) { error in
+                if let e = error {
+                    print(e.localizedDescription)
+                }
+                else {
+                    print("Data saved")
+                }
+            }
+        }
     }
-
+    
 }
 
 extension ChatViewController: UITableViewDataSource {
