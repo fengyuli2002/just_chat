@@ -38,8 +38,8 @@ class ChatViewController: UIViewController {
     }
     
     func loadMessages() {
-        messages = []
-        db.collection(Constants.FStore.collectionName).getDocuments { querySnapshot, error in
+        db.collection(Constants.FStore.collectionName).order(by: Constants.FStore.dateField).addSnapshotListener { querySnapshot, error in
+            self.messages = []
             if let e = error {
                 print(e.localizedDescription)
             }
@@ -49,20 +49,21 @@ class ChatViewController: UIViewController {
                         let data = doc.data()
                         if let sender = data[Constants.FStore.senderField] as? String, let body = data[Constants.FStore.bodyField] as? String {
                             let newMessage = Message(sender: sender, body: body)
+                            print(newMessage.body)
                             self.messages.append(newMessage)
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
                         }
                     }
                 }
             }
         }
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
         if let messageBody = messageTextfield.text, let messageSender = Auth.auth().currentUser?.email {
-            db.collection(Constants.FStore.collectionName).addDocument(data: [Constants.FStore.senderField: messageSender, Constants.FStore.bodyField: messageBody]) { error in
+            db.collection(Constants.FStore.collectionName).addDocument(data: [Constants.FStore.senderField: messageSender, Constants.FStore.bodyField: messageBody, Constants.FStore.dateField: Date().timeIntervalSince1970]) { error in
                 if let e = error {
                     print(e.localizedDescription)
                 }
